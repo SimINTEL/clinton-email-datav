@@ -1,10 +1,12 @@
 package com.aprj.controller.api;
 
 import com.aprj.entities.Emails;
+import com.aprj.models.EmailContentModel;
 import com.aprj.models.MoneyCountModel;
 import com.aprj.models.SenderCount;
 import com.aprj.models.UrlCountModel;
 import com.aprj.service.impl.EmailService;
+import org.hibernate.validator.constraints.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,38 @@ public class EmailController {
     @GetMapping("all")
     public List<Emails> GetAllEmail() {
         return emailService.GetAllMails();
+    }
+
+    @GetMapping("over_emotive")
+    public List<EmailContentModel> GetAllEmailOverEmotive(){
+        List<Emails> all = emailService.GetAllMails();
+        ArrayList<EmailContentModel> webs = new ArrayList<EmailContentModel>();
+        all.forEach(email->{
+            Pattern p = Pattern.compile("[a-z]+[?|]{2,}");
+            Matcher matcher = p.matcher(email.getRawText());
+            if (matcher.find()) {
+                String url = matcher.group()
+                        .replace(" ", "")
+                        .replace("corn", "com")
+                        .replace("<http:", "")
+                        .replace("tcom", "com")
+                        .replace("sa1on", "salon")
+                        .replace("sabon", "salon")
+                        .replace("i2o12", "")
+                        .replace("i2olgbo", "")
+                        .replace("juaricole.com", "juancole.com")
+                        .replace("controHer", "controller")
+                        .replace("cO.uk", ".co.uk")
+                        .replace("vvvvw.", "www.");
+                EmailContentModel model = new EmailContentModel();
+                model.setFrom(email.getExtractedFrom());
+                model.setTo(email.getExtractedTo());
+                model.setContent(email.getExtractedBodyText());
+                webs.add(model);
+                logger.info(url);
+            }
+        });
+        return webs;
     }
 
     @GetMapping("top10web")
