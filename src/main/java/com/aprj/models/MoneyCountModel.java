@@ -1,25 +1,27 @@
 package com.aprj.models;
 
+import java.math.BigDecimal;
+
 /**
  * Created by southdom on 2017/4/20.
  */
 public class MoneyCountModel {
 
-    private Double amount;
+    private BigDecimal amount;
     private String sender;
     private String receiver;
 
-    public MoneyCountModel(Double amount, String sender, String receiver) {
+    public MoneyCountModel(BigDecimal amount, String sender, String receiver) {
         this.amount = amount;
         this.sender = sender;
         this.receiver = receiver;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 

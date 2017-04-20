@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.event.MouseMotionAdapter;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.*;
 import java.util.stream.Collectors;
@@ -71,19 +72,29 @@ public class EmailController {
         return list;
     }
 
-    @GetMapping("top10money")
-    public List<MoneyCountModel> GetTop10MoneyMentionedEmail() {
+    @GetMapping("top100money")
+    public List<MoneyCountModel> GetTop100MoneyMentionedEmail() {
         List<MoneyCountModel> temp = new ArrayList<MoneyCountModel>();
         List<Emails> all = emailService.GetAllMails();
-        Pattern p = Pattern.compile("\\$\\d+");
+        Pattern p = Pattern.compile("\\$\\d+ (million|billion|hundred|thousand)");
 
         all.forEach(email -> {
             Matcher matcher = p.matcher(email.getRawText());
             if (matcher.find()) {
                 String s = matcher.group();
 
-                MoneyCountModel m = new MoneyCountModel(
-                        Double.parseDouble(matcher.group().replace("$", "")),
+                BigDecimal bigDecimal = new BigDecimal(Double.parseDouble(matcher.group()
+                        .replace(" ","")
+                        .replace("$", "")
+                        .replace("million", "000000")
+                        .replace("billion", "000000000")
+                        .replace("hundreds","00")
+                        .replace("thousands", "000")
+                        .replace("hundred","00")
+                        .replace("thousand", "000")
+                ));
+
+                MoneyCountModel m = new MoneyCountModel(bigDecimal,
                         email.getMetadataFrom(),
                         email.getMetadataTo());
                 temp.add(m);
@@ -94,7 +105,7 @@ public class EmailController {
         List<MoneyCountModel> result = temp.stream()
                 .sorted((s1, s2) -> {
                     return s2.getAmount().compareTo(s1.getAmount());
-                }).limit(10)
+                }).limit(100)
                 .collect(Collectors.toList());
 
         return result;
