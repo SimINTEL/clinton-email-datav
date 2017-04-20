@@ -63,7 +63,7 @@ public class EmailController {
                 .sorted((s1,s2)->{
                     return s2.getCount().compareTo(s1.getCount());
                 })
-                .limit(20)
+                .limit(10)
                 .collect(Collectors.toList());
         return list;
     }
