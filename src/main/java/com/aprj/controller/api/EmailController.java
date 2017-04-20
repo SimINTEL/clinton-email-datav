@@ -5,13 +5,11 @@ import com.aprj.models.MoneyCountModel;
 import com.aprj.models.SenderCount;
 import com.aprj.models.UrlCountModel;
 import com.aprj.service.impl.EmailService;
-import com.aprj.service.impl.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.event.MouseMotionAdapter;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.*;
@@ -85,13 +83,13 @@ public class EmailController {
                 String s = matcher.group();
 
                 BigDecimal bigDecimal = new BigDecimal(Double.parseDouble(matcher.group()
-                        .replace(" ","")
+                        .replace(" ", "")
                         .replace("$", "")
                         .replace("million", "000000")
                         .replace("billion", "000000000")
-                        .replace("hundreds","00")
+                        .replace("hundreds", "00")
                         .replace("thousands", "000")
-                        .replace("hundred","00")
+                        .replace("hundred", "00")
                         .replace("thousand", "000")
                 ));
 
@@ -113,20 +111,19 @@ public class EmailController {
     }
 
     @GetMapping("top10senders")
-    public List<SenderCount> GetTop10Senders(){
+    public List<SenderCount> GetTop10Senders() {
         List<Emails> all = emailService.GetAllMails();
         Map<String, Integer> mails = new HashMap<>();
 
         all.forEach(email -> {
-            if(null != email.getExtractedFrom() && !"".equals(email.getExtractedFrom())){
+            if (null != email.getExtractedFrom() && !"".equals(email.getExtractedFrom())) {
                 String from = email.getExtractedFrom()
                         .replace("< ", "<")
                         .replace(" >", ">");
 
-                if(mails.containsKey(from)){
+                if (mails.containsKey(from)) {
                     mails.put(from, mails.get(from) + 1);
-                }
-                else{
+                } else {
                     mails.put(from, 1);
                 }
                 logger.info(from);
@@ -134,7 +131,7 @@ public class EmailController {
         });
 
         List<SenderCount> list = mails.entrySet().stream()
-                .map(kv -> new SenderCount(kv.getValue(),kv.getKey()))
+                .map(kv -> new SenderCount(kv.getValue(), kv.getKey()))
                 .sorted((s1, s2) -> {
                     return s2.getCount().compareTo(s1.getCount());
                 })
