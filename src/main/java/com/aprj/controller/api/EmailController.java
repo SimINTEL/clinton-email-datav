@@ -140,4 +140,7 @@ public class EmailController {
         return list;
     }
 
+    //todo: read json file dncs_link and dncs_node, return datav connection json
+    //todo: read json file podestas_link and podestas_node return datav connection json
+
 }
