@@ -2,6 +2,7 @@ package com.aprj.controller.api;
 
 import com.aprj.entities.Emails;
 import com.aprj.models.MoneyCountModel;
+import com.aprj.models.SenderCount;
 import com.aprj.models.UrlCountModel;
 import com.aprj.service.impl.EmailService;
 import com.aprj.service.impl.UserService;
@@ -111,5 +112,35 @@ public class EmailController {
         return result;
     }
 
+    @GetMapping("top10senders")
+    public List<SenderCount> GetTop10Senders(){
+        List<Emails> all = emailService.GetAllMails();
+        Map<String, Integer> mails = new HashMap<>();
+
+        all.forEach(email -> {
+            if(null != email.getExtractedFrom() && !"".equals(email.getExtractedFrom())){
+                String from = email.getExtractedFrom()
+                        .replace("< ", "<")
+                        .replace(" >", ">");
+
+                if(mails.containsKey(from)){
+                    mails.put(from, mails.get(from) + 1);
+                }
+                else{
+                    mails.put(from, 1);
+                }
+                logger.info(from);
+            }
+        });
+
+        List<SenderCount> list = mails.entrySet().stream()
+                .map(kv -> new SenderCount(kv.getValue(),kv.getKey()))
+                .sorted((s1, s2) -> {
+                    return s2.getCount().compareTo(s1.getCount());
+                })
+                .limit(10)
+                .collect(Collectors.toList());
+        return list;
+    }
 
 }
