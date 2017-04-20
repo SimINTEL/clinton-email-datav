@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class MainController {
 
-    @GetMapping(value = {"", "/home"})
-    public String home(){
-        return "home";
-    }
+//    @GetMapping(value = {"", "/home"})
+//    public String home(){
+//        return "home";
+//    }
 
 //    @PreAuthorize("hasAnyAuthority('ADMIN')")
 //    @GetMapping(value = "/helloadmin")
