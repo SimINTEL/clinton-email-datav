@@ -15,6 +15,6 @@ public interface EmailsDao extends JpaRepository<Emails, Long> {
     @Query("select u from Emails u")
     Stream<Emails> findAllByCustomQueryAndStream();
 
-    @Query("select u from Emails u where u.extractedfrom = ?1")
+    @Query("select u from Emails u where u.extractedFrom = ?1")
     List<Emails> findByExtractedFrom(String emailFrom);
 }
