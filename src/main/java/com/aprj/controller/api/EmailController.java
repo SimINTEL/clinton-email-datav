@@ -23,7 +23,7 @@ public class EmailController {
     @Autowired
     EmailService emailService;
 
-    @GetMapping("GetAllEmail")
+    @GetMapping("all")
     public List<Emails> GetAllEmail(){
         return emailService.GetAllMails();
     }
