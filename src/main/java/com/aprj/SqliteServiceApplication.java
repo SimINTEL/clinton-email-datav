@@ -6,14 +6,9 @@ import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletCont
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 
 @SpringBootApplication
-public class SqliteServiceApplication implements EmbeddedServletContainerCustomizer {
+public class SqliteServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SqliteServiceApplication.class, args);
-	}
-
-	@Override
-	public void customize(ConfigurableEmbeddedServletContainer container){
-		container.setPort(8081);
 	}
 }
