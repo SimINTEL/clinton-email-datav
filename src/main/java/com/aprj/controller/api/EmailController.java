@@ -1,10 +1,7 @@
 package com.aprj.controller.api;
 
 import com.aprj.entities.Emails;
-import com.aprj.models.EmailContentModel;
-import com.aprj.models.MoneyCountModel;
-import com.aprj.models.SenderCount;
-import com.aprj.models.UrlCountModel;
+import com.aprj.models.*;
 import com.aprj.service.impl.EmailService;
 import org.hibernate.validator.constraints.Email;
 import org.slf4j.Logger;
@@ -15,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.lang.Integer;
 
@@ -171,6 +169,52 @@ public class EmailController {
                 })
                 .limit(10)
                 .collect(Collectors.toList());
+        return list;
+    }
+
+    @GetMapping("top10receviers")
+    public List<RecvCount> GetTop10Receviers() {
+        List<Emails> all = emailService.GetAllMails();
+        Map<String, Integer> mails = new HashMap<>();
+
+        all.forEach(email -> {
+            if (null != email.getExtractedFrom() && !"".equals(email.getExtractedTo())) {
+                String to = email.getExtractedTo()
+                        .replace("< ", "<")
+                        .replace(" >", ">");
+
+                if (mails.containsKey(to)) {
+                    mails.put(to, mails.get(to) + 1);
+                } else {
+                    mails.put(to, 1);
+                }
+                logger.info(to);
+            }
+        });
+
+        List<RecvCount> list = mails.entrySet().stream()
+                .map(kv -> new RecvCount(kv.getValue(), kv.getKey()))
+                .sorted((s1, s2) -> {
+                    return s2.getCount().compareTo(s1.getCount());
+                })
+                .limit(10)
+                .collect(Collectors.toList());
+        return list;
+    }
+
+    @GetMapping("email-time")
+    public List<TimeCount> EmailCountAlongTime() {
+        List<Emails> all = emailService.GetAllMails();
+        Map<String, Integer> mails = new HashMap<>();
+
+        Map<String,List<Emails>> grouped = all.stream().collect(Collectors.groupingBy(email->email.getMetadataDateSent()));
+        List<TimeCount> list = grouped.entrySet().stream().filter(kv->!kv.getKey().isEmpty()).map(kv->{
+            TimeCount t = new TimeCount();
+            t.setTime(kv.getKey());
+            t.setCount(kv.getValue().size());
+            t.setIds(kv.getValue().stream().map(x->x.getDocNumber()).collect(Collectors.toList()));
+            return t;
+        }).collect(Collectors.toList());
         return list;
     }
 
