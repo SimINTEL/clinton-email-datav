@@ -209,11 +209,11 @@ public class EmailController {
         Map<String, List<Emails>> grouped = all.stream().collect(Collectors.groupingBy(email -> email.getMetadataDateSent()));
         List<TimeCount> list = grouped.entrySet().stream().filter(kv -> !kv.getKey().isEmpty()).map(kv -> {
             TimeCount t = new TimeCount();
-            t.setTime(kv.getKey());
+            t.setTime(kv.getKey().substring(0,19).replace("T"," ").replace("-","/"));
             t.setCount(kv.getValue().size());
             t.setIds(kv.getValue().stream().map(x -> x.getDocNumber()).collect(Collectors.toList()));
             return t;
-        }).collect(Collectors.toList());
+        }).sorted((m1,m2)->m1.getTime().compareTo(m2.getTime())).collect(Collectors.toList());
         return list;
     }
 
