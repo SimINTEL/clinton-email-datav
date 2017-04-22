@@ -264,7 +264,7 @@ public class EmailController {
                 .sorted((s1, s2) -> {
                     return Integer.valueOf(s2.getValue()).compareTo(Integer.valueOf(s1.getValue()));
                 })
-                .limit(100)
+                .limit(50)
                 .collect(Collectors.toList());
 
         EmailRelationshipModel m = new EmailRelationshipModel(nodes, list);
