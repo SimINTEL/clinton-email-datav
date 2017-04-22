@@ -1,5 +1,6 @@
 package com.aprj.controller.api;
 
+import com.aprj.entities.EmailReceivers;
 import com.aprj.entities.Emails;
 import com.aprj.models.*;
 import com.aprj.service.impl.EmailService;
@@ -33,10 +34,10 @@ public class EmailController {
     }
 
     @GetMapping("over_emotive")
-    public List<EmailContentModel> GetAllEmailOverEmotive(){
+    public List<EmailContentModel> GetAllEmailOverEmotive() {
         List<Emails> all = emailService.GetAllMails();
         ArrayList<EmailContentModel> webs = new ArrayList<EmailContentModel>();
-        all.forEach(email->{
+        all.forEach(email -> {
             Pattern p = Pattern.compile("[a-z]+[?|]{2,}");
             Matcher matcher = p.matcher(email.getRawText());
             if (matcher.find()) {
@@ -205,12 +206,12 @@ public class EmailController {
         List<Emails> all = emailService.GetAllMails();
         Map<String, Integer> mails = new HashMap<>();
 
-        Map<String,List<Emails>> grouped = all.stream().collect(Collectors.groupingBy(email->email.getMetadataDateSent()));
-        List<TimeCount> list = grouped.entrySet().stream().filter(kv->!kv.getKey().isEmpty()).map(kv->{
+        Map<String, List<Emails>> grouped = all.stream().collect(Collectors.groupingBy(email -> email.getMetadataDateSent()));
+        List<TimeCount> list = grouped.entrySet().stream().filter(kv -> !kv.getKey().isEmpty()).map(kv -> {
             TimeCount t = new TimeCount();
             t.setTime(kv.getKey());
             t.setCount(kv.getValue().size());
-            t.setIds(kv.getValue().stream().map(x->x.getDocNumber()).collect(Collectors.toList()));
+            t.setIds(kv.getValue().stream().map(x -> x.getDocNumber()).collect(Collectors.toList()));
             return t;
         }).collect(Collectors.toList());
         return list;
@@ -218,5 +219,60 @@ public class EmailController {
 
     //todo: read json file dncs_link and dncs_node, return datav connection json
     //todo: read json file podestas_link and podestas_node return datav connection json
+    @GetMapping("email-relationship")
+    public List<EmailRelationshipModel> GetEmailRelationship() {
+        List<Emails> all = emailService.GetAllMails();
+        Set<Node> nodes = new HashSet<>();
+        Map<String, Integer> map = new HashMap<>();
 
+        all.forEach(email -> {
+            if (email.getMetadataFrom() != null && email.getMetadataTo() != null &&
+                    !"".equals(email.getMetadataFrom()) && !"".equals(email.getMetadataTo())) {
+                if (email.getMetadataFrom().equals("H")) {
+                    Node n = new Node("", email.getMetadataFrom(), "group");
+                    nodes.add(n);
+                } else {
+                    Node n = new Node("", email.getMetadataFrom(), "group2");
+                    nodes.add(n);
+                }
+
+                if (email.getMetadataTo().equals("H")) {
+                    Node n = new Node("", email.getMetadataTo(), "group");
+                    nodes.add(n);
+                } else {
+                    Node n = new Node("", email.getMetadataTo(), "group2");
+                    nodes.add(n);
+                }
+
+                String key = email.getMetadataFrom() + "#" + email.getMetadataTo();
+                String key1 = email.getMetadataTo() + "#" + email.getMetadataFrom();
+
+                if (map.containsKey(key) || map.containsKey(key1)) {
+                    if (map.get(key) != null) {
+                        map.put(key, map.get(key) + 1);
+                    } else {
+                        map.put(key1, map.get(key1) + 1);
+                    }
+                } else {
+                    map.put(key, 1);
+                }
+            }
+        });
+
+        List<Link> list = map.entrySet().stream()
+                .map(kv -> new Link(kv.getKey().split("#")[0],
+                        kv.getKey().split("#")[1],
+                        kv.getValue().toString()))
+                .sorted((s1, s2) -> {
+                    return Integer.valueOf(s2.getValue()).compareTo(Integer.valueOf(s1.getValue()));
+                })
+                .limit(100)
+                .collect(Collectors.toList());
+
+        EmailRelationshipModel m = new EmailRelationshipModel(nodes, list);
+        List<EmailRelationshipModel> result = new ArrayList<>();
+        result.add(m);
+
+        return result;
+    }
 }
