@@ -226,22 +226,6 @@ public class EmailController {
         all.forEach(email -> {
             if (email.getMetadataFrom() != null && email.getMetadataTo() != null &&
                     !"".equals(email.getMetadataFrom()) && !"".equals(email.getMetadataTo())) {
-                if (email.getMetadataFrom().equals("H")) {
-                    Node n = new Node("", email.getMetadataFrom(), "group");
-                    nodes.add(n);
-                } else {
-                    Node n = new Node("", email.getMetadataFrom(), "group2");
-                    nodes.add(n);
-                }
-
-                if (email.getMetadataTo().equals("H")) {
-                    Node n = new Node("", email.getMetadataTo(), "group");
-                    nodes.add(n);
-                } else {
-                    Node n = new Node("", email.getMetadataTo(), "group2");
-                    nodes.add(n);
-                }
-
                 String key = email.getMetadataFrom() + "#" + email.getMetadataTo();
                 String key1 = email.getMetadataTo() + "#" + email.getMetadataFrom();
 
@@ -260,12 +244,33 @@ public class EmailController {
         List<Link> list = map.entrySet().stream()
                 .map(kv -> new Link(kv.getKey().split("#")[0],
                         kv.getKey().split("#")[1],
-                        kv.getValue().toString()))
+                        kv.getValue().toString())
+                )
                 .sorted((s1, s2) -> {
                     return Integer.valueOf(s2.getValue()).compareTo(Integer.valueOf(s1.getValue()));
                 })
                 .limit(50)
                 .collect(Collectors.toList());
+
+        list.forEach(link -> {
+            if(link.getSource().equals("H")){
+                Node n = new Node("", link.getSource(), "group");
+                nodes.add(n);
+            }
+            else{
+                Node n = new Node("", link.getSource(), "group2");
+                nodes.add(n);
+            }
+
+            if(link.getTarget().equals("H")) {
+                Node n = new Node("", link.getTarget(), "group");
+                nodes.add(n);
+            }
+            else{
+                Node n = new Node("", link.getTarget(), "group2");
+                nodes.add(n);
+            }
+        });
 
         EmailRelationshipModel m = new EmailRelationshipModel(nodes, list);
         List<EmailRelationshipModel> result = new ArrayList<>();
